@@ -4,7 +4,7 @@
 
     <groupId>org.liu.luiz</groupId>
     <artifactId>columnz</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>0.1.0</version>
     <packaging>jar</packaging>
 
     <name>Spring Boot Blank Project (from https://github.com/making/spring-boot-blank)</name>
@@ -17,7 +17,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <start-class>org.liu.luiz.App</start-class>
+        <start-class>org.liu.luiz.demo.App</start-class>
         <java.version>1.8</java.version>
         <lombok.version>1.18.24</lombok.version>
         <log4jdbc.log4j2.version>1.16</log4jdbc.log4j2.version>
