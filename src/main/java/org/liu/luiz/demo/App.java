@@ -10,7 +10,7 @@ public class App {
         User user1 = new User("admin", 30, "admin@live.com", new Date());
         User user2 = new User("jack", 25, "jack@live.com", new Date());
 
-        Columnzy<User> columnzy = new Columnzy<>();
+        Columnzy<User> columnzy = new Columnzy<>(User.class);
         String[] headers = new String[]{"Name", "Age", "Birth", "Email"};
         columnzy.setHeaders(headers);
         System.out.println(String.join(",", headers));

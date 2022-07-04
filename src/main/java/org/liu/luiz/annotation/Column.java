@@ -1,5 +1,8 @@
 package org.liu.luiz.annotation;
 
+import org.liu.luiz.formatter.Converter;
+import org.liu.luiz.formatter.NullConverter;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -11,5 +14,7 @@ public @interface Column {
 
     String name() default "";
 
-    String dateFormat() default "";
+    String pattern() default "";
+
+    Class<? extends Converter> converter() default NullConverter.class;
 }

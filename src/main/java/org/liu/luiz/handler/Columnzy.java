@@ -2,18 +2,29 @@ package org.liu.luiz.handler;
 
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.liu.luiz.annotation.Column;
-import org.liu.luiz.formatter.DateFormatter;
+import org.liu.luiz.formatter.Converter;
+import org.liu.luiz.formatter.NullConverter;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.stream.Collectors;
 
 public class Columnzy<T> {
+
+    List<Field> annotatedFields;
     List<String> headers = new ArrayList<>();
 
+    Class<T> clazz;
+
+    public Columnzy(Class<T> clas) {
+        clazz = clas;
+        annotatedFields = Arrays.stream(clas.getDeclaredFields())
+                .filter(f -> f.getAnnotation(Column.class) != null)
+                .collect(Collectors.toList());
+    }
+
     public Object[] parse(T target) {
-        Field[] fields = target.getClass().getDeclaredFields();
-        List<Field> annotatedFields = Arrays.stream(fields).filter(f -> f.getAnnotation(Column.class) != null).collect(Collectors.toList());
 
         if (annotatedFields.size() == 0) return null;
         if (headers.size() > annotatedFields.size())
@@ -25,10 +36,14 @@ public class Columnzy<T> {
                     try {
                         Column col = f.getAnnotation(Column.class);
                         Object val = FieldUtils.readField(f, target, true);
-                        if (col.dateFormat() != null && !col.dateFormat().equals("") && val != null)
-                            val = new DateFormatter().convert((Date) val, col.dateFormat());
+
+                        if (val != null && col.converter() != NullConverter.class && !col.pattern().equals("")) {
+                            Converter converter = col.converter().getConstructor().newInstance();
+                            val = converter.toPattern(col.pattern()).apply(val);
+                        }
                         values.put(col.name(), val);
-                    } catch (IllegalAccessException e) {
+                    } catch (IllegalAccessException | InvocationTargetException | InstantiationException |
+                             NoSuchMethodException e) {
                         throw new RuntimeException(e);
                     }
                 }
@@ -45,7 +60,7 @@ public class Columnzy<T> {
     public List<Object[]> parse(T[] targets) {
         List<Object[]> values = new ArrayList<>();
 
-        for(T t : targets) {
+        for (T t : targets) {
             values.add(this.parse(t));
         }
         return values;
