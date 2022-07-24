@@ -7,11 +7,11 @@ import java.util.Date;
 
 public class App {
     public static void main(String[] args) {
-        User user1 = new User("admin", 30, "admin@live.com", new Date());
-        User user2 = new User("jack", 25, "jack@live.com", new Date());
+        User user1 = new User("admin", 30, "admin@live.com", new Date(), new Date());
+        User user2 = new User("jack", 25, "jack@live.com", new Date(), new Date());
 
         Columnzy<User> columnzy = new Columnzy<>(User.class);
-        String[] headers = new String[]{"Name", "Age", "Birth", "Email"};
+        String[] headers = new String[]{"Name", "Age", "Birth", "Email", "Create Time"};
         columnzy.setHeaders(headers);
         System.out.println(String.join(",", headers));
         columnzy.parse(new User[]{user1, user2}).forEach(c -> System.out.println(StringUtils.joinWith(",", c)));

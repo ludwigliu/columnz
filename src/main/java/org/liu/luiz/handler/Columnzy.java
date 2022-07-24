@@ -15,13 +15,32 @@ public class Columnzy<T> {
     List<Field> annotatedFields;
     List<String> headers = new ArrayList<>();
 
+    Map<String, Converter> converterMap = new HashMap<>();
+
     Class<T> clazz;
 
     public Columnzy(Class<T> clas) {
         clazz = clas;
-        annotatedFields = Arrays.stream(clas.getDeclaredFields())
+
+        init();
+    }
+
+    private void init() {
+        annotatedFields = Arrays.stream(this.clazz.getDeclaredFields())
                 .filter(f -> f.getAnnotation(Column.class) != null)
                 .collect(Collectors.toList());
+
+        annotatedFields.forEach(f -> {
+            Column col = f.getAnnotation(Column.class);
+            if(col.converter() != NullConverter.class && !col.pattern().equals("")) {
+                try {
+                    converterMap.put(col.name(), col.converter().getConstructor().newInstance());
+                } catch (InstantiationException | IllegalAccessException | InvocationTargetException |
+                         NoSuchMethodException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        });
     }
 
     public Object[] parse(T target) {
@@ -37,13 +56,12 @@ public class Columnzy<T> {
                         Column col = f.getAnnotation(Column.class);
                         Object val = FieldUtils.readField(f, target, true);
 
-                        if (val != null && col.converter() != NullConverter.class && !col.pattern().equals("")) {
-                            Converter converter = col.converter().getConstructor().newInstance();
+                        if(this.converterMap.containsKey(col.name())) {
+                            Converter converter = this.converterMap.get(col.name());
                             val = converter.toPattern(col.pattern()).apply(val);
                         }
                         values.put(col.name(), val);
-                    } catch (IllegalAccessException | InvocationTargetException | InstantiationException |
-                             NoSuchMethodException e) {
+                    } catch (IllegalAccessException e) {
                         throw new RuntimeException(e);
                     }
                 }
